@@ -116,6 +116,7 @@
                         away: { team: 'Arizona Diamondbacks', score: 0 },
                         venue: 'Chase Field',
                         time: '12:40 PM',
+                        date: 'January 15, 2025',
                         liveInfo: {
                             pitcher: 'Walker Buehler',
                             batter: 'Mookie Betts',
@@ -132,7 +133,8 @@
                         home: { team: 'Seattle Mariners', score: null },
                         away: { team: 'Dodgers', score: null },
                         venue: 'T-Mobile Park',
-                        time: '6:40 PM'
+                        time: '6:40 PM',
+                        date: 'January 16, 2025'
                     }
                 ]
             },
@@ -147,7 +149,8 @@
                         home: { team: 'Lakers', score: null },
                         away: { team: 'Golden State Warriors', score: null },
                         venue: 'Crypto.com Arena',
-                        time: '7:30 PM'
+                        time: '7:30 PM',
+                        date: 'January 17, 2025'
                     }
                 ]
             },
@@ -162,7 +165,8 @@
                         home: { team: 'Liverpool', score: null },
                         away: { team: 'Manchester United', score: null },
                         venue: 'Anfield',
-                        time: '12:30 PM'
+                        time: '12:30 PM',
+                        date: 'January 18, 2025'
                     }
                 ]
             },
@@ -177,7 +181,9 @@
                         home: { team: 'Chiefs', score: null },
                         away: { team: 'Denver Broncos', score: null },
                         venue: 'Arrowhead Stadium',
-                        time: '1:00 PM'
+                        time: '1:00 PM',
+                        date: 'January 22, 2025',
+                        date: 'January 19, 2025'
                     }
                 ]
             },
@@ -192,7 +198,8 @@
                         home: { team: '49ers', score: null },
                         away: { team: 'Los Angeles Rams', score: null },
                         venue: 'Levi\'s Stadium',
-                        time: '4:25 PM'
+                        time: '4:25 PM',
+                        date: 'January 20, 2025'
                     }
                 ]
             },
@@ -207,7 +214,8 @@
                         home: { team: 'Eagles', score: null },
                         away: { team: 'New York Giants', score: null },
                         venue: 'Lincoln Financial Field',
-                        time: '1:00 PM'
+                        time: '1:00 PM',
+                        date: 'January 22, 2025'
                     }
                 ]
             },
@@ -222,7 +230,8 @@
                         home: { team: 'Bills', score: null },
                         away: { team: 'New England Patriots', score: null },
                         venue: 'Highmark Stadium',
-                        time: '1:00 PM'
+                        time: '1:00 PM',
+                        date: 'January 23, 2025'
                     }
                 ]
             },
@@ -237,7 +246,8 @@
                         home: { team: 'Cowboys', score: null },
                         away: { team: 'Washington Commanders', score: null },
                         venue: 'AT&T Stadium',
-                        time: '1:00 PM'
+                        time: '1:00 PM',
+                        date: 'January 24, 2025'
                     }
                 ]
             },
@@ -252,7 +262,8 @@
                         home: { team: 'Ravens', score: null },
                         away: { team: 'Pittsburgh Steelers', score: null },
                         venue: 'M&T Bank Stadium',
-                        time: '1:00 PM'
+                        time: '1:00 PM',
+                        date: 'January 25, 2025'
                     }
                 ]
             }
@@ -403,7 +414,7 @@
                 container.innerHTML = team.games.map(game => `
                     <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between mb-4">
-                            <div class="text-sm text-gray-500">${game.time}</div>
+                            <div class="text-sm text-gray-500">${game.date} • ${game.time}</div>
                             <div class="text-sm font-medium ${getStatusColor(game.status)}">${game.status.replace('_', ' ').toUpperCase()}</div>
                         </div>
                         
