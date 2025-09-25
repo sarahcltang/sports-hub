@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Andrew's Sports Hub
+
+A modern Next.js app to view game times, scores, and live updates for featured teams:
+- ⚾ Los Angeles Dodgers (MLB) - with live game stats
+- 🏀 Los Angeles Lakers (NBA)
+- ⚽ Liverpool FC (Premier League)
+- 🏈 Top NFL teams (Chiefs, 49ers, Eagles, Bills, Cowboys, Ravens)
+
+## ✨ Features
+
+- **Live Game Updates**: Real-time scores and game status
+- **Live MLB Stats**: Current pitcher, batter, inning, and count during live games
+- **Auto-refresh**: Games update every minute automatically
+- **Modern UI**: Clean, responsive design with sport-specific emojis
+- **Multi-sport Support**: Baseball, Basketball, Soccer, and Football
+- **Real-time Clock**: Live time display in header
 
 ## Getting Started
 
-First, run the development server:
+1. Install Node.js 18+ (LTS recommended).
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+3. (Optional) Set up API keys for enhanced features:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Fill in:
+   - `TWITTER_BEARER_TOKEN` (Twitter/X API v2 recent search)
+   - `FOOTBALL_DATA_API_KEY` (football-data.org)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Run the dev server:
+   ```bash
+   npm run dev
+   ```
+   Open http://localhost:3001
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 What's New
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This version merges the best features from both the Express.js and Next.js versions:
+- **Enhanced UI**: Modern design with better styling and animations
+- **Live Game Stats**: Real-time pitcher/batter information for MLB games
+- **Auto-refresh**: Games update automatically every minute
+- **Better Error Handling**: Graceful fallbacks when APIs are unavailable
+- **Responsive Design**: Works great on desktop and mobile
 
-## Learn More
+## Data Providers
 
-To learn more about Next.js, take a look at the following resources:
+- MLB (Dodgers): MLB Stats API (public)
+- NBA (Lakers): balldontlie (public)
+- Soccer (Liverpool): football-data.org (API key required)
+- NFL: ESPN public scoreboard JSON (subject to change; no key)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All providers implement a common interface and return fallback data if the upstream request fails or is unavailable.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Commentary API
 
-## Deploy on Vercel
+Server route: `GET /api/commentary?q=Query` proxies to Twitter/X API v2 recent search using `TWITTER_BEARER_TOKEN`. If no token is configured, it returns a mocked informative item so the UI remains functional.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- This project uses the Next.js App Router with TailwindCSS.
+- Public endpoints may rate limit or change. For production, consider paid data providers for stability.
+- Do not expose your API keys to the browser; keep them in `.env.local`.

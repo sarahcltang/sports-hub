@@ -1,103 +1,263 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useMemo, useState } from 'react';
+import { FEATURED_TEAMS } from '@/lib/teams';
+import type { Game, Team } from '@/lib/types';
+import { createDateRangeForDate } from '@/lib/providers';
+import { getTeamLogo, getSportEmoji } from '@/lib/logos';
+
+function formatTime(iso: string) {
+  try { return new Date(iso).toLocaleString(); } catch { return iso; }
+}
+
+
+function getStatusColor(status: string) {
+  switch (status.toLowerCase()) {
+    case 'in_progress': return 'text-green-600 font-semibold';
+    case 'final': return 'text-blue-600';
+    case 'scheduled': return 'text-gray-600';
+    case 'postponed': return 'text-yellow-600';
+    case 'canceled': return 'text-red-600';
+    default: return 'text-gray-500';
+  }
+}
+
+export default function Page() {
+  const todayRange = useMemo(() => createDateRangeForDate(new Date()), []);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(FEATURED_TEAMS[0]);
+  const [games, setGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Auto-refresh games every minute
+  useEffect(() => {
+    if (!selectedTeam) return;
+    let cancelled = false;
+    
+    const fetchGames = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/games?teamId=${encodeURIComponent(selectedTeam.id)}`);
+        if (cancelled) return;
+        const data = await response.json();
+        setGames(data.ok ? data.data : []);
+      } catch (error) {
+        console.error('Failed to fetch games:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    fetchGames();
+    const interval = setInterval(fetchGames, 60000); // Refresh every minute
+
+    return () => { 
+      cancelled = true; 
+      clearInterval(interval);
+    };
+  }, [selectedTeam, todayRange]);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Andrew's Sports Hub</h1>
+          <div className="font-mono text-sm text-gray-600">
+            {currentTime.toLocaleString()}
+          </div>
+        </div>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* Team Selection */}
+        <div className="flex flex-wrap gap-2">
+          {FEATURED_TEAMS.map((team) => {
+            const logoUrl = getTeamLogo(team.id);
+            return (
+              <button 
+                key={team.id} 
+                onClick={() => setSelectedTeam(team)} 
+                className={`px-4 py-2 rounded-lg border transition-all duration-200 flex items-center ${
+                  selectedTeam?.id === team.id 
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50'
+                }`}
+              >
+                {logoUrl ? (
+                  <img 
+                    src={logoUrl} 
+                    alt={`${team.shortName} logo`}
+                    className="w-6 h-6 mr-2 object-contain team-logo"
+                    onError={(e) => {
+                      // Fallback to emoji if logo fails to load
+                      e.currentTarget.style.display = 'none';
+                      const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (nextElement) nextElement.style.display = 'inline';
+                    }}
+                  />
+                ) : null}
+                <span 
+                  className="mr-2" 
+                  style={{ display: logoUrl ? 'none' : 'inline' }}
+                >
+                  {getSportEmoji(team.sport)}
+                </span>
+                {team.shortName}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Games Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              {selectedTeam && (
+                <>
+                  {getTeamLogo(selectedTeam.id) ? (
+                    <img 
+                      src={getTeamLogo(selectedTeam.id)} 
+                      alt={`${selectedTeam.shortName} logo`}
+                      className="w-8 h-8 mr-3 object-contain team-logo"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (nextElement) nextElement.style.display = 'inline';
+                      }}
+                    />
+                  ) : null}
+                  <span 
+                    className="mr-3 text-2xl" 
+                    style={{ display: getTeamLogo(selectedTeam.id) ? 'none' : 'inline' }}
+                  >
+                    {getSportEmoji(selectedTeam.sport)}
+                  </span>
+                </>
+              )}
+              <h2 className="text-xl font-semibold text-gray-900">
+                {selectedTeam ? `${selectedTeam.name} Games` : 'Select a Team'}
+              </h2>
+            </div>
+            {loading && (
+              <div className="flex items-center text-sm text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                Updating...
+              </div>
+            )}
+          </div>
+
+          {!selectedTeam ? (
+            <div className="text-center py-12 text-gray-500">
+              Select a team above to view their games
+            </div>
+          ) : loading && games.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              Loading games...
+            </div>
+          ) : games.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm border p-6 text-center text-gray-500">
+              <div className="text-4xl mb-2">📅</div>
+              <div className="text-lg font-medium mb-1">No games scheduled</div>
+              <div className="text-sm">Check back later for upcoming games</div>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {games.map((game) => (
+                <div key={game.id} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                  {/* Game Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-sm text-gray-500">
+                      {formatTime(game.startsAtISO)}
+                    </div>
+                    <div className={`text-sm font-medium ${getStatusColor(game.status)}`}>
+                      {game.status.replace('_', ' ').toUpperCase()}
+                    </div>
+                  </div>
+
+                  {/* Teams and Score */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="text-lg font-semibold">{game.away.team.shortName}</div>
+                      {game.away.score !== null && (
+                        <div className="text-xl font-bold text-gray-900">{game.away.score}</div>
+                      )}
+                    </div>
+                    
+                    <div className="text-gray-400 font-medium">@</div>
+                    
+                    <div className="flex items-center space-x-3">
+                      {game.home.score !== null && (
+                        <div className="text-xl font-bold text-gray-900">{game.home.score}</div>
+                      )}
+                      <div className="text-lg font-semibold">{game.home.team.shortName}</div>
+                    </div>
+                  </div>
+
+                  {/* Venue */}
+                  {game.venue && (
+                    <div className="text-sm text-gray-500 border-t pt-3">
+                      📍 {game.venue}
+                    </div>
+                  )}
+
+                  {/* Live Game Information */}
+                  {game.status === 'in_progress' && (
+                    <div className="mt-3 pt-3 border-t">
+                      <div className="flex items-center text-green-600 font-medium mb-3">
+                        <div className="w-2 h-2 bg-green-600 rounded-full mr-2 animate-pulse"></div>
+                        LIVE
+                      </div>
+                      
+                      {game.liveInfo && (
+                        <div className="space-y-2 text-sm">
+                          {/* Current Pitcher */}
+                          {game.liveInfo.currentPitcher && (
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Pitcher:</span>
+                              <span className="font-medium">{game.liveInfo.currentPitcher.name}</span>
+                            </div>
+                          )}
+                          
+                          {/* Current Batter */}
+                          {game.liveInfo.currentBatter && (
+                            <div className="space-y-1">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Batter:</span>
+                                <span className="font-medium">{game.liveInfo.currentBatter.name}</span>
+                              </div>
+                              <div className="flex justify-between text-xs text-gray-500">
+                                <span>Inning: {game.liveInfo.currentBatter.inning}</span>
+                                <span>Outs: {game.liveInfo.currentBatter.outs}</span>
+                                <span>Count: {game.liveInfo.currentBatter.balls}-{game.liveInfo.currentBatter.strikes}</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Inning Info */}
+                          {game.liveInfo.inning && game.liveInfo.inningState && (
+                            <div className="text-xs text-gray-500">
+                              {game.liveInfo.inningState} of {game.liveInfo.inning}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
