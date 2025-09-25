@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrew's Sports Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .team-logo {
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+            transition: transform 0.2s ease;
+        }
+        .team-logo:hover {
+            transform: scale(1.05);
+        }
+        .live-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-gray-900">Andrew's Sports Hub</h1>
+            <div id="clock" class="font-mono text-sm text-gray-600"></div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        <!-- Team Selection -->
+        <div class="flex flex-wrap gap-2">
+            <button onclick="selectTeam('dodgers')" id="btn-dodgers" class="team-btn px-4 py-2 rounded-lg border transition-all duration-200 flex items-center bg-blue-600 text-white border-blue-600 shadow-md">
+                <img src="https://a.espncdn.com/i/teamlogos/mlb/500/la.png" alt="Dodgers logo" class="w-6 h-6 mr-2 object-contain team-logo">
+                Dodgers
+            </button>
+            <button onclick="selectTeam('lakers')" id="btn-lakers" class="team-btn px-4 py-2 rounded-lg border transition-all duration-200 flex items-center bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50">
+                <img src="https://a.espncdn.com/i/teamlogos/nba/500/lal.png" alt="Lakers logo" class="w-6 h-6 mr-2 object-contain team-logo">
+                Lakers
+            </button>
+            <button onclick="selectTeam('liverpool')" id="btn-liverpool" class="team-btn px-4 py-2 rounded-lg border transition-all duration-200 flex items-center bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50">
+                <img src="https://a.espncdn.com/i/teamlogos/soccer/500/364.png" alt="Liverpool logo" class="w-6 h-6 mr-2 object-contain team-logo">
+                Liverpool
+            </button>
+            <button onclick="selectTeam('chiefs')" id="btn-chiefs" class="team-btn px-4 py-2 rounded-lg border transition-all duration-200 flex items-center bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50">
+                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/kc.png" alt="Chiefs logo" class="w-6 h-6 mr-2 object-contain team-logo">
+                Chiefs
+            </button>
+            <button onclick="selectTeam('49ers')" id="btn-49ers" class="team-btn px-4 py-2 rounded-lg border transition-all duration-200 flex items-center bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50">
+                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/sf.png" alt="49ers logo" class="w-6 h-6 mr-2 object-contain team-logo">
+                49ers
+            </button>
+            <button onclick="selectTeam('eagles')" id="btn-eagles" class="team-btn px-4 py-2 rounded-lg border transition-all duration-200 flex items-center bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50">
+                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="Eagles logo" class="w-6 h-6 mr-2 object-contain team-logo">
+                Eagles
+            </button>
+            <button onclick="selectTeam('bills')" id="btn-bills" class="team-btn px-4 py-2 rounded-lg border transition-all duration-200 flex items-center bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50">
+                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="Bills logo" class="w-6 h-6 mr-2 object-contain team-logo">
+                Bills
+            </button>
+            <button onclick="selectTeam('cowboys')" id="btn-cowboys" class="team-btn px-4 py-2 rounded-lg border transition-all duration-200 flex items-center bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50">
+                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/dal.png" alt="Cowboys logo" class="w-6 h-6 mr-2 object-contain team-logo">
+                Cowboys
+            </button>
+            <button onclick="selectTeam('ravens')" id="btn-ravens" class="team-btn px-4 py-2 rounded-lg border transition-all duration-200 flex items-center bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50">
+                <img src="https://a.espncdn.com/i/teamlogos/nfl/500/bal.png" alt="Ravens logo" class="w-6 h-6 mr-2 object-contain team-logo">
+                Ravens
+            </button>
+        </div>
+
+        <!-- Games Section -->
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <img id="team-logo" src="https://a.espncdn.com/i/teamlogos/mlb/500/la.png" alt="Team logo" class="w-8 h-8 mr-3 object-contain team-logo">
+                    <h2 id="team-title" class="text-xl font-semibold text-gray-900">Los Angeles Dodgers Games</h2>
+                </div>
+                <div id="loading" class="hidden flex items-center text-sm text-gray-500">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    Updating...
+                </div>
+            </div>
+
+            <div id="games-container">
+                <!-- Games will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Team data
+        const teams = {
+            dodgers: {
+                name: 'Los Angeles Dodgers',
+                logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/la.png',
+                sport: 'MLB',
+                games: [
+                    {
+                        id: 'dodgers-live',
+                        status: 'in_progress',
+                        home: { team: 'Dodgers', score: 8 },
+                        away: { team: 'Arizona Diamondbacks', score: 0 },
+                        venue: 'Chase Field',
+                        time: '12:40 PM',
+                        liveInfo: {
+                            pitcher: 'Walker Buehler',
+                            batter: 'Mookie Betts',
+                            inning: '7',
+                            inningState: 'Bottom',
+                            outs: 1,
+                            balls: 2,
+                            strikes: 1
+                        }
+                    },
+                    {
+                        id: 'dodgers-next',
+                        status: 'scheduled',
+                        home: { team: 'Seattle Mariners', score: null },
+                        away: { team: 'Dodgers', score: null },
+                        venue: 'T-Mobile Park',
+                        time: '6:40 PM'
+                    }
+                ]
+            },
+            lakers: {
+                name: 'Los Angeles Lakers',
+                logo: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
+                sport: 'NBA',
+                games: [
+                    {
+                        id: 'lakers-next',
+                        status: 'scheduled',
+                        home: { team: 'Lakers', score: null },
+                        away: { team: 'Golden State Warriors', score: null },
+                        venue: 'Crypto.com Arena',
+                        time: '7:30 PM'
+                    }
+                ]
+            },
+            liverpool: {
+                name: 'Liverpool FC',
+                logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/364.png',
+                sport: 'EPL',
+                games: [
+                    {
+                        id: 'liverpool-next',
+                        status: 'scheduled',
+                        home: { team: 'Liverpool', score: null },
+                        away: { team: 'Manchester United', score: null },
+                        venue: 'Anfield',
+                        time: '12:30 PM'
+                    }
+                ]
+            },
+            chiefs: {
+                name: 'Kansas City Chiefs',
+                logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/kc.png',
+                sport: 'NFL',
+                games: [
+                    {
+                        id: 'chiefs-next',
+                        status: 'scheduled',
+                        home: { team: 'Chiefs', score: null },
+                        away: { team: 'Denver Broncos', score: null },
+                        venue: 'Arrowhead Stadium',
+                        time: '1:00 PM'
+                    }
+                ]
+            },
+            '49ers': {
+                name: 'San Francisco 49ers',
+                logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sf.png',
+                sport: 'NFL',
+                games: [
+                    {
+                        id: '49ers-next',
+                        status: 'scheduled',
+                        home: { team: '49ers', score: null },
+                        away: { team: 'Los Angeles Rams', score: null },
+                        venue: 'Levi\'s Stadium',
+                        time: '4:25 PM'
+                    }
+                ]
+            },
+            eagles: {
+                name: 'Philadelphia Eagles',
+                logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/phi.png',
+                sport: 'NFL',
+                games: [
+                    {
+                        id: 'eagles-next',
+                        status: 'scheduled',
+                        home: { team: 'Eagles', score: null },
+                        away: { team: 'New York Giants', score: null },
+                        venue: 'Lincoln Financial Field',
+                        time: '1:00 PM'
+                    }
+                ]
+            },
+            bills: {
+                name: 'Buffalo Bills',
+                logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/buf.png',
+                sport: 'NFL',
+                games: [
+                    {
+                        id: 'bills-next',
+                        status: 'scheduled',
+                        home: { team: 'Bills', score: null },
+                        away: { team: 'New England Patriots', score: null },
+                        venue: 'Highmark Stadium',
+                        time: '1:00 PM'
+                    }
+                ]
+            },
+            cowboys: {
+                name: 'Dallas Cowboys',
+                logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/dal.png',
+                sport: 'NFL',
+                games: [
+                    {
+                        id: 'cowboys-next',
+                        status: 'scheduled',
+                        home: { team: 'Cowboys', score: null },
+                        away: { team: 'Washington Commanders', score: null },
+                        venue: 'AT&T Stadium',
+                        time: '1:00 PM'
+                    }
+                ]
+            },
+            ravens: {
+                name: 'Baltimore Ravens',
+                logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/bal.png',
+                sport: 'NFL',
+                games: [
+                    {
+                        id: 'ravens-next',
+                        status: 'scheduled',
+                        home: { team: 'Ravens', score: null },
+                        away: { team: 'Pittsburgh Steelers', score: null },
+                        venue: 'M&T Bank Stadium',
+                        time: '1:00 PM'
+                    }
+                ]
+            }
+        };
+
+        let currentTeam = 'dodgers';
+
+        // Update clock
+        function updateClock() {
+            document.getElementById('clock').textContent = new Date().toLocaleString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Select team
+        function selectTeam(teamId) {
+            currentTeam = teamId;
+            const team = teams[teamId];
+            
+            // Update button styles
+            document.querySelectorAll('.team-btn').forEach(btn => {
+                btn.className = btn.className.replace('bg-blue-600 text-white border-blue-600 shadow-md', 'bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50');
+            });
+            document.getElementById(`btn-${teamId}`).className = document.getElementById(`btn-${teamId}`).className.replace('bg-white text-gray-700 border-gray-300 hover:border-blue-300 hover:bg-blue-50', 'bg-blue-600 text-white border-blue-600 shadow-md');
+            
+            // Update header
+            document.getElementById('team-logo').src = team.logo;
+            document.getElementById('team-logo').alt = `${team.name} logo`;
+            document.getElementById('team-title').textContent = `${team.name} Games`;
+            
+            // Load games
+            loadGames(team);
+        }
+
+        // Load games
+        function loadGames(team) {
+            const container = document.getElementById('games-container');
+            const loading = document.getElementById('loading');
+            
+            loading.classList.remove('hidden');
+            
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                
+                if (team.games.length === 0) {
+                    container.innerHTML = `
+                        <div class="bg-white rounded-lg shadow-sm border p-6 text-center text-gray-500">
+                            <div class="text-4xl mb-2">📅</div>
+                            <div class="text-lg font-medium mb-1">No games scheduled</div>
+                            <div class="text-sm">Check back later for upcoming games</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = team.games.map(game => `
+                    <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="text-sm text-gray-500">${game.time}</div>
+                            <div class="text-sm font-medium ${getStatusColor(game.status)}">${game.status.replace('_', ' ').toUpperCase()}</div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="text-lg font-semibold">${game.away.team}</div>
+                                ${game.away.score !== null ? `<div class="text-xl font-bold text-gray-900">${game.away.score}</div>` : ''}
+                            </div>
+                            
+                            <div class="text-gray-400 font-medium">@</div>
+                            
+                            <div class="flex items-center space-x-3">
+                                ${game.home.score !== null ? `<div class="text-xl font-bold text-gray-900">${game.home.score}</div>` : ''}
+                                <div class="text-lg font-semibold">${game.home.team}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-gray-500 border-t pt-3">
+                            📍 ${game.venue}
+                        </div>
+                        
+                        ${game.status === 'in_progress' && game.liveInfo ? `
+                            <div class="mt-3 pt-3 border-t">
+                                <div class="flex items-center text-green-600 font-medium mb-3">
+                                    <div class="w-2 h-2 bg-green-600 rounded-full mr-2 live-pulse"></div>
+                                    LIVE
+                                </div>
+                                
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Pitcher:</span>
+                                        <span class="font-medium">${game.liveInfo.pitcher}</span>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Batter:</span>
+                                            <span class="font-medium">${game.liveInfo.batter}</span>
+                                        </div>
+                                        <div class="flex justify-between text-xs text-gray-500">
+                                            <span>Inning: ${game.liveInfo.inning}</span>
+                                            <span>Outs: ${game.liveInfo.outs}</span>
+                                            <span>Count: ${game.liveInfo.balls}-${game.liveInfo.strikes}</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        ${game.liveInfo.inningState} of ${game.liveInfo.inning}
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }, 500);
+        }
+
+        // Get status color
+        function getStatusColor(status) {
+            switch (status.toLowerCase()) {
+                case 'in_progress': return 'text-green-600 font-semibold';
+                case 'final': return 'text-blue-600';
+                case 'scheduled': return 'text-gray-600';
+                case 'postponed': return 'text-yellow-600';
+                case 'canceled': return 'text-red-600';
+                default: return 'text-gray-500';
+            }
+        }
+
+        // Auto-refresh games every minute
+        setInterval(() => {
+            loadGames(teams[currentTeam]);
+        }, 60000);
+
+        // Initialize with Dodgers
+        loadGames(teams.dodgers);
+    </script>
+</body>
+</html>
